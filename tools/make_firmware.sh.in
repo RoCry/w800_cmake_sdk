@@ -9,6 +9,7 @@ TOP_DIR=..
 DST_DIR=${TOP_DIR}/@FIRMWARE_OUT_DIR_NAME@
 
 W800_TOOLS_DIR=${TOP_DIR}/@W800_TOOLS_DIR@
+WM_TOOL=${DST_DIR}/wm_tool
 
 if [ ! "@MSYS_BIN_PATH_FOR_BUILD_DIR@"x = "x" ]; then
   export PATH=@MSYS_BIN_PATH_FOR_BUILD_DIR@:$PATH
@@ -71,9 +72,9 @@ if [ $code_encrypt -eq 1 ]; then
   # combine img: app_code_enc.bin + usrkey_enc.bin + pubkey_N.bin --> app.img
   cat "$ProjName"_enc.bin key_en.dat > "$ProjName"_enc_key.bin
   cat "$ProjName"_enc_key.bin ${W800_TOOLS_DIR}/w800/ca/capub_"$prikey_sel"_N.dat > "$ProjName"_enc_key_N.bin
-  ${W800_TOOLS_DIR}/w800/wm_tool -b ./"$ProjName"_enc_key_N.bin -o ./"$ProjName" -it $img_type -fc 0 -ra $run_img_pos -ih $run_img_header -ua $upd_img_pos -nh 0 -un 0
+  ${WM_TOOL} -b ./"$ProjName"_enc_key_N.bin -o ./"$ProjName" -it $img_type -fc 0 -ra $run_img_pos -ih $run_img_header -ua $upd_img_pos -nh 0 -un 0
 else
-  ${W800_TOOLS_DIR}/w800/wm_tool -b ./"$ProjName".bin -o ./"$ProjName" -it $img_type -fc 0 -ra $run_img_pos -ih $run_img_header -ua $upd_img_pos -nh 0 -un 0
+  ${WM_TOOL} -b ./"$ProjName".bin -o ./"$ProjName" -it $img_type -fc 0 -ra $run_img_pos -ih $run_img_header -ua $upd_img_pos -nh 0 -un 0
 fi
 
 mkdir -p ${DST_DIR}
@@ -94,22 +95,22 @@ if [ $signature -eq 1 ]; then
   cat ./"$ProjName".img ./"$ProjName"_sign.dat > ./"$ProjName"_sign.img
   mv ./"$ProjName"_sign.img ${DST_DIR}/"$ProjName"_sign.img
   # combine boot.img + app_sign.img
-  ${W800_TOOLS_DIR}/w800/wm_tool -b ${W800_TOOLS_DIR}/w800/w800_secboot.bin -o ${DST_DIR}/w800_secboot -it 0 -fc 0 -ra $sec_img_pos -ih $sec_img_header -ua $upd_img_pos -nh $run_img_header -un 0
+  ${WM_TOOL} -b ${W800_TOOLS_DIR}/w800/w800_secboot.bin -o ${DST_DIR}/w800_secboot -it 0 -fc 0 -ra $sec_img_pos -ih $sec_img_header -ua $upd_img_pos -nh $run_img_header -un 0
   cat ${DST_DIR}/w800_secboot.img ${DST_DIR}/"$ProjName"_sign.img > ${DST_DIR}/"$ProjName".fls
 else
   mv ./"$ProjName".img ${DST_DIR}/"$ProjName".img
   # combine boot.img + app_sign.img
-  ${W800_TOOLS_DIR}/w800/wm_tool -b ${W800_TOOLS_DIR}/w800/w800_secboot.bin -o ${DST_DIR}/w800_secboot -it 0 -fc 0 -ra $sec_img_pos -ih $sec_img_header -ua $upd_img_pos -nh $run_img_header -un 0
+  ${WM_TOOL} -b ${W800_TOOLS_DIR}/w800/w800_secboot.bin -o ${DST_DIR}/w800_secboot -it 0 -fc 0 -ra $sec_img_pos -ih $sec_img_header -ua $upd_img_pos -nh $run_img_header -un 0
   cat ${DST_DIR}/w800_secboot.img ${DST_DIR}/"$ProjName".img > ${DST_DIR}/"$ProjName".fls
 fi
 
 # produce compressed ota firmware
 if [ $zip_type -eq 1 ]; then
   if [ $signature -eq 1 ]; then
-    ${W800_TOOLS_DIR}/w800/wm_tool -b ${DST_DIR}/"$ProjName"_sign.img -o ${DST_DIR}/"$ProjName"_sign -it $img_type -fc 1 -ra $run_img_pos -ih $run_img_header -ua $upd_img_pos -nh 0 -un 0
+    ${WM_TOOL} -b ${DST_DIR}/"$ProjName"_sign.img -o ${DST_DIR}/"$ProjName"_sign -it $img_type -fc 1 -ra $run_img_pos -ih $run_img_header -ua $upd_img_pos -nh 0 -un 0
     mv ${DST_DIR}/"$ProjName"_sign_gz.img ${DST_DIR}/"$ProjName"_sign_ota.img
   else
-    ${W800_TOOLS_DIR}/w800/wm_tool -b ${DST_DIR}/"$ProjName".img -o ${DST_DIR}/"$ProjName" -it $img_type -fc 1 -ra $run_img_pos -ih $run_img_header -ua $upd_img_pos -nh 0 -un 0
+    ${WM_TOOL} -b ${DST_DIR}/"$ProjName".img -o ${DST_DIR}/"$ProjName" -it $img_type -fc 1 -ra $run_img_pos -ih $run_img_header -ua $upd_img_pos -nh 0 -un 0
     mv ${DST_DIR}/"$ProjName"_gz.img ${DST_DIR}/"$ProjName"_ota.img
   fi
 fi
